@@ -4,135 +4,165 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>3D Flipbook - Kerala Kala Kendram</title>
-<style>
-  :root { --accent: #007bff; --accent-hover: #0056b3; --vh: 1vh; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
 
-  body {
+<!-- Stylish font for "Onaghosham 2025" -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+
+<style>
+  :root { --accent:#007bff; --accent-hover:#0056b3; --vh:1vh; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html, body { height:100%; }
+
+  body{
     font-family: system-ui, sans-serif;
     min-height: calc(var(--vh) * 100);
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     background: #f4f4f4;
     padding: 8px;
   }
-  @supports (height: 100dvh) { body { min-height: 100dvh; } }
+  @supports (height:100dvh){ body{ min-height:100dvh; } }
 
-  header, footer {
-    text-align: center;
-    padding: 10px;
-    color: white;
-    font-weight: bold;
-    border-radius: 6px;
-  }
-  header {
-    background: #b22222;
-    font-size: 1.4rem;
-    margin-bottom: 8px;
-  }
-  footer {
-    background: #228b22;
-    font-size: 1.1rem;
-    margin-top: 8px;
-  }
-
-  .flipbook-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+  .flipbook-container{
+    position: relative;         /* for overlay header */
     width: 100%;
     max-width: 700px;
-    margin: auto;
+    height: calc(var(--vh) * 100 - 16px); /* full height in the available area */
+    display: flex;
+    flex-direction: column;
   }
 
-  #book-wrap {
+  /* BOOK AREA (takes all available space) */
+  #book-wrap{
+    position: relative;
     flex: 1;
     min-height: 0;
     display: grid;
     place-items: center;
   }
-
-  #flipbook {
+  #flipbook{
     width: 100%;
     height: 100%;
-    max-height: calc(100% - 80px);
     position: relative;
     transform-style: preserve-3d;
-    background: white;
+    background: #fff;
+    border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0,0,0,.12);
     overflow: hidden;
-    border-radius: 10px;
   }
 
-  .page {
-    position: absolute;
-    inset: 0;
+  /* FLIP PAGES */
+  .page{
+    position: absolute; inset: 0;
     transform-origin: left;
     backface-visibility: hidden;
-    transition: transform 0.8s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transition: transform .8s ease;
+    display: flex; align-items: center; justify-content: center;
   }
-  .page img {
+  .page img{
     width: 100%;
     height: 100%;
     object-fit: contain;
+    display: block;
   }
 
-  .controls {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    padding: 10px;
+  /* OVERLAY HEADER (transparent, does not consume height) */
+  .overlay-header{
+    position: absolute;
+    top: 8px; left: 50%; transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none; /* taps go to the book */
+    z-index: 5;
+    /* subtle text-shadow for readability on any background */
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
   }
-  .controls button {
+  .overlay-header .small-line{
+    /* single line across all screens */
+    white-space: nowrap;
+    font-size: clamp(12px, 2.8vw, 16px);
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: .3px;
+  }
+  .overlay-header .stylish{
+    font-family: "Great Vibes", cursive;
+    font-weight: 400;
+    font-size: clamp(20px, 6.5vw, 44px);
+    line-height: 1.05;
+    color: #ffe08a; /* festive gold-ish */
+    margin-top: 2px;
+  }
+
+  /* CONTROLS overlaid at the bottom so book keeps full size */
+  .controls{
+    position: absolute;
+    bottom: 8px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 12px; justify-content: center;
+    padding: 8px 10px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+    background: linear-gradient(to top, rgba(244,244,244,.95), rgba(244,244,244,0));
+    z-index: 5;
+  }
+  .controls button{
     padding: 8px 18px;
     font-size: 16px;
+    border: none; border-radius: 8px;
+    background: var(--accent); color: #fff;
     cursor: pointer;
-    border: none;
-    background: var(--accent);
-    color: white;
-    border-radius: 8px;
-    transition: background 0.3s ease;
+    transition: background .25s ease;
   }
-  .controls button:hover { background: var(--accent-hover); }
-  .controls button:disabled { background: #ccc; cursor: default; }
+  .controls button:hover{ background: var(--accent-hover); }
+  .controls button:disabled{ background:#ccc; cursor: default; }
 
-  .meta {
-    text-align: center;
-    padding-bottom: 8px;
-    font-size: 14px;
-    color: #333;
+  /* Counter tucked just above controls */
+  .meta{
+    position: absolute;
+    bottom: 58px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; color: #333;
+    padding: 2px 8px; border-radius: 6px;
+    background: rgba(255,255,255,.8);
+    backdrop-filter: blur(2px);
+    z-index: 5;
   }
+
+  /* Debug class for missing images (optional) */
+  .img-missing{ outline:4px solid rgba(255,0,0,.85); }
 </style>
 </head>
 <body>
 
-<header>Kerala Kala Kendram – Onaghosham 2025</header>
-
 <div class="flipbook-container">
   <div id="book-wrap">
-    <div id="flipbook"></div>
+    <!-- Transparent overlay heading -->
+    <div class="overlay-header">
+      <div class="small-line">Kerala Kala Kendram, Margao</div>
+      <div class="stylish">Onaghosham 2025</div>
+    </div>
+
+    <!-- Book -->
+    <div id="flipbook" aria-live="polite"></div>
+
+    <!-- Page counter and controls (overlay; do not shrink book) -->
+    <div class="meta" id="counter">Page 1 / 3</div>
+    <div class="controls">
+      <button id="prev">⬅ Prev</button>
+      <button id="next">Next ➡</button>
+    </div>
   </div>
-  <div class="controls">
-    <button id="prev">⬅ Prev</button>
-    <button id="next">Next ➡</button>
-  </div>
-  <div class="meta" id="counter">Page 1 / 3</div>
 </div>
 
-<footer>All are welcome and Happy Onam</footer>
-
 <script>
-  function setVH() {
+  // Dynamic VH for mobile address bar behavior
+  function setVH(){
     document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
   }
   setVH();
   window.addEventListener('resize', setVH);
   window.addEventListener('orientationchange', setVH);
 
+  // Your page images
   const images = [
     "page/p1.webp",
     "page/p2.webp",
@@ -140,9 +170,9 @@
   ];
 
   const flipbook = document.getElementById("flipbook");
-  const prevBtn = document.getElementById("prev");
-  const nextBtn = document.getElementById("next");
-  const counter = document.getElementById("counter");
+  const prevBtn  = document.getElementById("prev");
+  const nextBtn  = document.getElementById("next");
+  const counter  = document.getElementById("counter");
 
   let currentIndex = 0;
 
@@ -150,38 +180,34 @@
     const page = document.createElement("div");
     page.className = "page";
     page.style.zIndex = images.length - i;
+
     const img = document.createElement("img");
     img.src = src;
     img.alt = `Page ${i+1}`;
+    img.addEventListener('error', () => img.classList.add('img-missing'));
+
     page.appendChild(img);
     flipbook.appendChild(page);
     return page;
   });
 
-  function showPage(index) {
+  function clamp(i){ return Math.max(0, Math.min(i, pages.length - 1)); }
+
+  function showPage(index){
+    index = clamp(index);
     pages.forEach((page, i) => {
       page.style.transform = i < index ? "rotateY(-180deg)" : "rotateY(0deg)";
     });
-    counter.textContent = `Page ${Math.min(index+1, images.length)} / ${images.length}`;
-    prevBtn.disabled = index === 0;
-    nextBtn.disabled = index === images.length - 1;
+    currentIndex = index;
+    counter.textContent = `Page ${currentIndex + 1} / ${pages.length}`;
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex === pages.length - 1;
   }
 
-  prevBtn.addEventListener("click", () => {
-    if (currentIndex > 0) {
-      currentIndex--;
-      showPage(currentIndex);
-    }
-  });
+  prevBtn.addEventListener("click", () => showPage(currentIndex - 1));
+  nextBtn.addEventListener("click", () => showPage(currentIndex + 1));
 
-  nextBtn.addEventListener("click", () => {
-    if (currentIndex < pages.length - 1) {
-      currentIndex++;
-      showPage(currentIndex);
-    }
-  });
-
-  showPage(currentIndex);
+  showPage(0);
 </script>
 
 </body>
