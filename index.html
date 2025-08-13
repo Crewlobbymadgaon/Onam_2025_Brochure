@@ -81,7 +81,9 @@
   white-space: nowrap;
   font-size: clamp(16px, 3.5vw, 20px);
   font-weight: 700;
-  color: #d4af37; /* rich gold for better contrast */
+  background: linear-gradient(90deg, #d4af37, #ff4500); /* dark yellow to red */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   letter-spacing: 0.5px;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
 }
@@ -91,7 +93,9 @@
   font-weight: 400;
   font-size: clamp(28px, 7.5vw, 54px);
   line-height: 1.05;
-  color: #ff6600; /* bright burnt orange for visibility */
+  background: linear-gradient(90deg, #ffd700, #ff3300); /* bright yellow to red */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin-top: 4px;
   text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
 }
