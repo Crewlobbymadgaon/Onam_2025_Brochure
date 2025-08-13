@@ -1,194 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>3D Flipbook - Kerala Kala Kendram</title>
+<title>3D Flipbook - Debug</title>
 <style>
-  :root {
-    --accent: #007bff;
-    --accent-hover: #0056b3;
-    /* Fallback: will be set via JS to window.innerHeight * 0.01 */
-    --vh: 1vh;
+  :root { --accent: #007bff; --accent-hover: #0056b3; --vh: 1vh; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:system-ui, sans-serif;
+    min-height:calc(var(--vh) * 100);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f4f4f4;
+    padding:8px;
+  }
+  @supports (height:100dvh){ body{min-height:100dvh} }
+  .flipbook-container{
+    width:100%;
+    max-width:700px;
+    display:flex;
+    flex-direction:column;
+    height:calc(var(--vh) * 100 - 16px); /* keep inside viewport */
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  /* Use dynamic viewport units where supported, fall back to JS --vh */
-  body {
-    background: #f4f4f4;
-    font-family: system-ui, sans-serif;
-    min-height: calc(var(--vh) * 100);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-bottom: env(safe-area-inset-bottom); /* for iOS notch */
-  }
-  @supports (height: 100dvh) {
-    body { min-height: 100dvh; }
-  }
-  /* Some Androids prefer svh (small viewport) to avoid bounce */
-  @supports (height: 100svh) {
-    body { min-height: 100svh; }
+  #book-wrap{ flex:1; min-height:0; display:grid; place-items:center; }
+  #flipbook{
+    width:100%;
+    height:100%;
+    max-height:calc(100% - 80px); /* leave room for controls/meta */
+    position:relative;
+    transform-style:preserve-3d;
+    background:white;
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+    overflow:hidden;
+    border-radius:10px;
   }
 
-  .flipbook-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    max-width: 600px;
-    /* keep some breathing room from device edges */
-    padding: 8px;
+  .page{
+    position:absolute; inset:0;
+    transform-origin:left;
+    backface-visibility:hidden;
+    transition:transform .8s ease;
+    display:flex; align-items:center; justify-content:center;
   }
 
-  #book-wrap {
-    perspective: 2000px;
-    flex: 1;                 /* take all remaining height */
-    width: 100%;
-    display: grid;
-    place-items: center;
-    min-height: 0;           /* allow child to shrink properly */
+  .page img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
   }
 
-  #flipbook {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    background: #fff;
-    box-shadow: 0 10px 30px rgba(0,0,0,.12);
-    overflow: hidden;
-    border-radius: 10px;
-  }
+  /* debug: red border if image fails to load (class applied by JS) */
+  .img-missing{ outline:4px solid rgba(255,0,0,.85); }
 
-  .page {
-    position: absolute;
-    inset: 0;
-    transform-origin: left;
-    backface-visibility: hidden;
-    transition: transform 0.8s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .controls{
+    position:sticky; bottom:0;
+    display:flex; gap:12px; justify-content:center;
+    padding:10px 8px calc(10px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top, rgba(244,244,244,.95), rgba(244,244,244,0));
   }
+  .controls button{ padding:8px 18px; font-size:16px; border-radius:8px; border:none; background:var(--accent); color:#fff; cursor:pointer }
+  .controls button:disabled{ background:#ccc; cursor:default }
+  .meta{ text-align:center; padding:6px 0; color:#333 }
 
-  .page img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* fit image fully without cropping */
-  }
-
-  /* Controls are sticky at bottom so they never slip out of view */
-  .controls {
-    position: sticky;
-    bottom: 0;
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
-    background: linear-gradient(to top, rgba(244,244,244,0.95), rgba(244,244,244,0));
-    backdrop-filter: blur(4px);
-    z-index: 2;
-  }
-
-  .controls button {
-    padding: 8px 18px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    background: var(--accent);
-    color: white;
-    border-radius: 8px;
-    transition: background 0.3s ease;
-  }
-
-  .controls button:hover { background: var(--accent-hover); }
-  .controls button:disabled { background: #ccc; cursor: default; }
-
-  .meta {
-    font-size: 14px;
-    color: #333;
-    text-align: center;
-    padding: 4px 0 8px;
-  }
+  /* small helper: show img src list for debugging (toggle by JS) */
+  #debugList{ font-size:12px; color:#666; padding:6px; text-align:center; display:none }
 </style>
 </head>
 <body>
 
 <div class="flipbook-container">
   <div id="book-wrap">
-    <div id="flipbook"></div>
+    <div id="flipbook" aria-live="polite"></div>
   </div>
 
   <div class="controls">
     <button id="prev">⬅ Prev</button>
     <button id="next">Next ➡</button>
   </div>
-  <div class="meta" id="counter">Page 1 / 3</div>
+  <div class="meta" id="counter">Page 0 / 0</div>
+  <div id="debugList"></div>
 </div>
 
 <script>
-  // ----- Dynamic VH fallback for older mobile browsers -----
-  function setViewportHeightVar() {
-    // 1% of the viewport height
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  // reliable viewport height variable
+  function setVH(){
+    document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
   }
-  setViewportHeightVar();
-  window.addEventListener('resize', setViewportHeightVar);
-  window.addEventListener('orientationchange', setViewportHeightVar);
+  setVH();
+  window.addEventListener('resize', setVH);
+  window.addEventListener('orientationchange', setVH);
 
-  // ----- Flipbook logic -----
+  // <-- IMAGES: update these paths if needed -->
   const images = [
     "page/p1.webp",
     "page/p2.webp",
     "page/p3.webp"
   ];
 
-  const flipbook = document.getElementById("flipbook");
-  const prevBtn = document.getElementById("prev");
-  const nextBtn = document.getElementById("next");
-  const counter = document.getElementById("counter");
+  const flipbook = document.getElementById('flipbook');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const counter = document.getElementById('counter');
+  const debugList = document.getElementById('debugList');
 
+  // debug: show list of image URLs (toggle visible by setting showDebug true)
+  const showDebug = false;
+  if (showDebug) {
+    debugList.style.display = 'block';
+    debugList.textContent = 'Images: ' + images.join(' | ');
+  }
+
+  // create pages
   let currentIndex = 0;
-
   const pages = images.map((src, i) => {
-    const page = document.createElement("div");
-    page.className = "page";
+    const page = document.createElement('div');
+    page.className = 'page';
     page.style.zIndex = images.length - i;
-    const img = document.createElement("img");
+    const img = document.createElement('img');
     img.src = src;
     img.alt = `Page ${i+1}`;
+    // if image cannot be loaded, mark it visibly
+    img.addEventListener('error', () => img.classList.add('img-missing'));
+    // optional: quick click to advance
+    img.addEventListener('click', () => { if (currentIndex < pages.length - 1) { currentIndex++; showPage(currentIndex) }});
     page.appendChild(img);
     flipbook.appendChild(page);
     return page;
   });
 
-  function showPage(index) {
-    pages.forEach((page, i) => {
-      page.style.transform = i < index ? "rotateY(-180deg)" : "rotateY(0deg)";
-    });
-    counter.textContent = `Page ${Math.min(index+1, images.length)} / ${images.length}`;
-    prevBtn.disabled = index === 0;
-    nextBtn.disabled = index === images.length;
+  // safe bounds: index must be 0 .. pages.length-1
+  function clampIndex(idx){
+    if (idx < 0) return 0;
+    if (idx > pages.length - 1) return pages.length - 1;
+    return idx;
   }
 
-  prevBtn.addEventListener("click", () => {
-    if (currentIndex > 0) {
-      currentIndex--;
-      showPage(currentIndex);
-    }
+  function showPage(index){
+    index = clampIndex(index);
+    pages.forEach((page, i) => {
+      // pages with index < current are flipped (like turned)
+      page.style.transform = i < index ? 'rotateY(-180deg)' : 'rotateY(0deg)';
+    });
+    currentIndex = index;
+    counter.textContent = `Page ${currentIndex + 1} / ${pages.length}`;
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex === pages.length - 1;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    if (currentIndex > 0) showPage(currentIndex - 1);
+  });
+  nextBtn.addEventListener('click', () => {
+    if (currentIndex < pages.length - 1) showPage(currentIndex + 1);
   });
 
-  nextBtn.addEventListener("click", () => {
-    if (currentIndex < pages.length) {
-      currentIndex++;
-      showPage(currentIndex);
-    }
-  });
+  // initial render
+  if (pages.length === 0) {
+    counter.textContent = 'No pages found';
+  } else {
+    showPage(0);
+  }
 
-  showPage(currentIndex);
+  // tiny helper: if nothing shows, uncomment this and open console to inspect images
+  // console.log('image elements:', document.querySelectorAll('#flipbook img'));
 </script>
 
 </body>
