@@ -6,8 +6,6 @@
 <title>3D Flipbook - Kerala Kala Kendram</title>
 <style>
   :root {
-    --book-max-w: 600px;
-    --book-h: 70vh; /* reduced so buttons fit without scroll */
     --accent: #007bff;
     --accent-hover: #0056b3;
   }
@@ -17,23 +15,25 @@
   body {
     background: #f4f4f4;
     font-family: system-ui, sans-serif;
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
-    align-items: center; /* vertical centering */
-    justify-content: center; /* horizontal centering */
+    align-items: center; 
+    justify-content: center;
   }
 
   .flipbook-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 100%;
+    width: 100%;
+    max-width: 600px;
   }
 
   #book-wrap {
-    width: 90%;
-    max-width: var(--book-max-w);
-    height: var(--book-h);
     perspective: 2000px;
+    flex: 1; /* take all remaining height */
+    width: 100%;
     display: grid;
     place-items: center;
   }
@@ -46,7 +46,6 @@
     background: #fff;
     box-shadow: 0 10px 30px rgba(0,0,0,.12);
     overflow: hidden;
-    border-radius: 8px;
   }
 
   .page {
@@ -56,21 +55,23 @@
     backface-visibility: hidden;
     transition: transform 0.8s ease;
     display: flex;
-    align-items: center; /* vertical center image */
+    align-items: center;
     justify-content: center;
   }
 
   .page img {
     max-width: 100%;
     max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
   }
 
   .controls {
-    margin-top: 10px;
     display: flex;
     gap: 20px;
     justify-content: center;
+    padding: 10px 0;
   }
 
   .controls button {
@@ -90,8 +91,7 @@
   .meta {
     font-size: 14px;
     color: #333;
-    margin-top: 6px;
-    text-align: center;
+    padding-bottom: 5px;
   }
 </style>
 </head>
