@@ -77,11 +77,12 @@
     /* subtle text-shadow for readability on any background */
     text-shadow: 0 1px 2px rgba(0,0,0,.35);
   }
+
 .overlay-header .small-line {
   white-space: nowrap;
   font-size: clamp(16px, 3.5vw, 20px);
   font-weight: 700;
-  background: linear-gradient(90deg, #d4af37, #ff4500); /* dark yellow to red */
+  background: linear-gradient(90deg, #d4af37, #ff8c00, #ff3300); /* deep gold → orange → red */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 0.5px;
@@ -91,15 +92,14 @@
 .overlay-header .stylish {
   font-family: "Great Vibes", cursive;
   font-weight: 400;
-  font-size: clamp(28px, 7.5vw, 54px);
+  font-size: clamp(30px, 7.5vw, 54px);
   line-height: 1.05;
-  background: linear-gradient(90deg, #ffd700, #ff3300); /* bright yellow to red */
+  background: linear-gradient(90deg, #ffd700, #ff6600, #ff0000); /* yellow → orange → red */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-top: 4px;
+  margin-top: 10px; /* increased gap from small-line */
   text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
 }
-
 .controls {
   position: absolute;
   bottom: 8px;
