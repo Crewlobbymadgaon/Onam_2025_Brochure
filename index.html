@@ -96,27 +96,40 @@
   text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
 }
 
-  /* CONTROLS overlaid at the bottom so book keeps full size */
-  .controls{
-    position: absolute;
-    bottom: 8px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 12px; justify-content: center;
-    padding: 8px 10px;
-    border-radius: 10px;
-    backdrop-filter: blur(4px);
-    background: linear-gradient(to top, rgba(244,244,244,.95), rgba(244,244,244,0));
-    z-index: 5;
-  }
-  .controls button{
-    padding: 8px 18px;
-    font-size: 16px;
-    border: none; border-radius: 8px;
-    background: var(--accent); color: #fff;
-    cursor: pointer;
-    transition: background .25s ease;
-  }
-  .controls button:hover{ background: var(--accent-hover); }
-  .controls button:disabled{ background:#ccc; cursor: default; }
+.controls {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px; /* slightly reduced gap */
+  justify-content: center;
+  padding: 6px 8px; /* smaller padding */
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  background: linear-gradient(to top, rgba(244,244,244,.95), rgba(244,244,244,0));
+  z-index: 5;
+}
+
+.controls button {
+  padding: 6px 14px; /* reduced button size */
+  font-size: 14px; /* slightly smaller text */
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  transition: background .25s ease;
+}
+
+.controls button:hover {
+  background: var(--accent-hover);
+}
+
+.controls button:disabled {
+  background: #ccc;
+  cursor: default;
+}
 
   /* Counter tucked just above controls */
   .meta{
