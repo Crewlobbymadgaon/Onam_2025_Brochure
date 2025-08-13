@@ -1,74 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>3D Flipbook - Kerala Kala Kendram</title>
 <style>
+  :root {
+    --book-max-w: 600px;
+    --book-h: 70vh; /* reduced so buttons fit without scroll */
+    --accent: #007bff;
+    --accent-hover: #0056b3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    margin: 0;
-    padding: 0;
     background: #f4f4f4;
-    font-family: sans-serif;
+    font-family: system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center; /* vertical centering */
+    justify-content: center; /* horizontal centering */
+  }
+
+  .flipbook-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh;
+  }
+
+  #book-wrap {
+    width: 90%;
+    max-width: var(--book-max-w);
+    height: var(--book-h);
+    perspective: 2000px;
+    display: grid;
+    place-items: center;
   }
 
   #flipbook {
-    perspective: 2000px;
-    width: 90%;
-    max-width: 600px;
-    height: 80vh;
+    width: 100%;
+    height: 100%;
     position: relative;
+    transform-style: preserve-3d;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    overflow: hidden;
+    border-radius: 8px;
   }
 
   .page {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     transform-origin: left;
     backface-visibility: hidden;
     transition: transform 0.8s ease;
+    display: flex;
+    align-items: center; /* vertical center image */
+    justify-content: center;
   }
 
   .page img {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
   }
 
   .controls {
-    margin-top: auto;
+    margin-top: 10px;
     display: flex;
     gap: 20px;
     justify-content: center;
-    padding: 10px;
   }
 
   .controls button {
-    padding: 10px 20px;
-    font-size: 18px;
+    padding: 8px 18px;
+    font-size: 16px;
     cursor: pointer;
     border: none;
-    background-color: #007bff;
+    background: var(--accent);
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
+    transition: background 0.3s ease;
   }
 
-  .controls button:hover {
-    background-color: #0056b3;
+  .controls button:hover { background: var(--accent-hover); }
+  .controls button:disabled { background: #ccc; cursor: default; }
+
+  .meta {
+    font-size: 14px;
+    color: #333;
+    margin-top: 6px;
+    text-align: center;
   }
 </style>
 </head>
 <body>
 
-<div id="flipbook"></div>
+<div class="flipbook-container">
+  <div id="book-wrap">
+    <div id="flipbook"></div>
+  </div>
 
-<div class="controls">
-  <button id="prev">⬅ Prev</button>
-  <button id="next">Next ➡</button>
+  <div class="controls">
+    <button id="prev">⬅ Prev</button>
+    <button id="next">Next ➡</button>
+  </div>
+  <div class="meta" id="counter">Page 1 / 3</div>
 </div>
 
 <script>
@@ -79,6 +117,10 @@
   ];
 
   const flipbook = document.getElementById("flipbook");
+  const prevBtn = document.getElementById("prev");
+  const nextBtn = document.getElementById("next");
+  const counter = document.getElementById("counter");
+
   let currentIndex = 0;
 
   const pages = images.map((src, i) => {
@@ -87,6 +129,7 @@
     page.style.zIndex = images.length - i;
     const img = document.createElement("img");
     img.src = src;
+    img.alt = `Page ${i+1}`;
     page.appendChild(img);
     flipbook.appendChild(page);
     return page;
@@ -94,22 +137,21 @@
 
   function showPage(index) {
     pages.forEach((page, i) => {
-      if (i < index) {
-        page.style.transform = "rotateY(-180deg)";
-      } else {
-        page.style.transform = "rotateY(0deg)";
-      }
+      page.style.transform = i < index ? "rotateY(-180deg)" : "rotateY(0deg)";
     });
+    counter.textContent = `Page ${Math.min(index+1, images.length)} / ${images.length}`;
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === images.length;
   }
 
-  document.getElementById("prev").addEventListener("click", () => {
+  prevBtn.addEventListener("click", () => {
     if (currentIndex > 0) {
       currentIndex--;
       showPage(currentIndex);
     }
   });
 
-  document.getElementById("next").addEventListener("click", () => {
+  nextBtn.addEventListener("click", () => {
     if (currentIndex < pages.length) {
       currentIndex++;
       showPage(currentIndex);
