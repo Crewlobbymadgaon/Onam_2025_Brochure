@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Flipbook - Kerala Kala Kendram</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  #flipbook {
+    perspective: 2000px;
+    width: 90%;
+    max-width: 600px;
+    height: 80vh;
+    position: relative;
+  }
+
+  .page {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-origin: left;
+    backface-visibility: hidden;
+    transition: transform 0.8s ease;
+  }
+
+  .page img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .controls {
+    margin-top: auto;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .controls button {
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+  }
+
+  .controls button:hover {
+    background-color: #0056b3;
+  }
+</style>
+</head>
+<body>
+
+<div id="flipbook"></div>
+
+<div class="controls">
+  <button id="prev">⬅ Prev</button>
+  <button id="next">Next ➡</button>
+</div>
+
+<script>
+  const images = [
+    "pdf/p1.webp",
+    "pdf/p10.webp",
+    "pdf/p11.webp"
+  ];
+
+  const flipbook = document.getElementById("flipbook");
+  let currentIndex = 0;
+
+  const pages = images.map((src, i) => {
+    const page = document.createElement("div");
+    page.className = "page";
+    page.style.zIndex = images.length - i;
+    const img = document.createElement("img");
+    img.src = src;
+    page.appendChild(img);
+    flipbook.appendChild(page);
+    return page;
+  });
+
+  function showPage(index) {
+    pages.forEach((page, i) => {
+      if (i < index) {
+        page.style.transform = "rotateY(-180deg)";
+      } else {
+        page.style.transform = "rotateY(0deg)";
+      }
+    });
+  }
+
+  document.getElementById("prev").addEventListener("click", () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      showPage(currentIndex);
+    }
+  });
+
+  document.getElementById("next").addEventListener("click", () => {
+    if (currentIndex < pages.length) {
+      currentIndex++;
+      showPage(currentIndex);
+    }
+  });
+
+  showPage(currentIndex);
+</script>
+
+</body>
+</html>
