@@ -8,34 +8,47 @@
   :root {
     --accent: #007bff;
     --accent-hover: #0056b3;
+    /* Fallback: will be set via JS to window.innerHeight * 0.01 */
+    --vh: 1vh;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* Use dynamic viewport units where supported, fall back to JS --vh */
   body {
     background: #f4f4f4;
     font-family: system-ui, sans-serif;
-    height: 100vh;
+    min-height: calc(var(--vh) * 100);
     display: flex;
-    align-items: center; 
+    align-items: center;
     justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom); /* for iOS notch */
+  }
+  @supports (height: 100dvh) {
+    body { min-height: 100dvh; }
+  }
+  /* Some Androids prefer svh (small viewport) to avoid bounce */
+  @supports (height: 100svh) {
+    body { min-height: 100svh; }
   }
 
   .flipbook-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
     height: 100%;
     width: 100%;
     max-width: 600px;
+    /* keep some breathing room from device edges */
+    padding: 8px;
   }
 
   #book-wrap {
     perspective: 2000px;
-    flex: 1; /* take all remaining height */
+    flex: 1;                 /* take all remaining height */
     width: 100%;
     display: grid;
     place-items: center;
+    min-height: 0;           /* allow child to shrink properly */
   }
 
   #flipbook {
@@ -46,6 +59,7 @@
     background: #fff;
     box-shadow: 0 10px 30px rgba(0,0,0,.12);
     overflow: hidden;
+    border-radius: 10px;
   }
 
   .page {
@@ -60,18 +74,22 @@
   }
 
   .page img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* fit image fully without cropping */
   }
 
+  /* Controls are sticky at bottom so they never slip out of view */
   .controls {
+    position: sticky;
+    bottom: 0;
     display: flex;
-    gap: 20px;
+    gap: 12px;
     justify-content: center;
-    padding: 10px 0;
+    padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, rgba(244,244,244,0.95), rgba(244,244,244,0));
+    backdrop-filter: blur(4px);
+    z-index: 2;
   }
 
   .controls button {
@@ -81,7 +99,7 @@
     border: none;
     background: var(--accent);
     color: white;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: background 0.3s ease;
   }
 
@@ -91,7 +109,8 @@
   .meta {
     font-size: 14px;
     color: #333;
-    padding-bottom: 5px;
+    text-align: center;
+    padding: 4px 0 8px;
   }
 </style>
 </head>
@@ -110,6 +129,17 @@
 </div>
 
 <script>
+  // ----- Dynamic VH fallback for older mobile browsers -----
+  function setViewportHeightVar() {
+    // 1% of the viewport height
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+  setViewportHeightVar();
+  window.addEventListener('resize', setViewportHeightVar);
+  window.addEventListener('orientationchange', setViewportHeightVar);
+
+  // ----- Flipbook logic -----
   const images = [
     "page/p1.webp",
     "page/p2.webp",
